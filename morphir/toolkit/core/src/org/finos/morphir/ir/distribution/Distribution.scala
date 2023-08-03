@@ -34,6 +34,7 @@ object Distribution {
     def lookupTypeSpecification(pName: PackageName, module: QualifiedModuleName, localName: Name): Option[UTypeSpec] =
       lookupModuleSpecification(pName, module).flatMap(_.lookupTypeSpecification(localName))
 
+    // Look up the base type name following aliases by package, module and local name in a distribution.
     def lookupBaseTypeName(fqName: FQName): Option[FQName] =
       lookupModuleSpecification(fqName.packagePath, fqName.getModuleName).flatMap(modSpec =>
         modSpec
@@ -46,6 +47,7 @@ object Distribution {
           )
       )
 
+    // Look up a value specification by package, module and local name in a distribution.
     def lookupValueSpecification(
         packageName: PackageName,
         module: QualifiedModuleName,
@@ -53,8 +55,14 @@ object Distribution {
     ): Option[UValueSpec] =
       lookupModuleSpecification(packageName, module).flatMap(_.lookupValueSpecification(localName))
 
-    def lookupValueDefinition(qName: QName): Option[ValueDefinition[scala.Unit, UType]] =
-      packageDef.lookupModuleDefinition(qName.modulePath).flatMap(_.lookupValueDefinition(qName.localName))
+    // Look up a value definition by qualified name in a distribution. The value will only be searched in the current
+    // package.
+    def lookupValueDefinition(fqName: FQName): Option[ValueDefinition[scala.Unit, UType]] =
+      self match {
+        case Library(pName, _, packageDef) if pName == fqName.packagePath =>
+          packageDef.lookupModuleDefinition(fqName.modulePath).flatMap(_.lookupValueDefinition(fqName.localName))
+        case Library(_, _, _) => None
+      }
 
     def lookupPackageSpecification: UPackageSpecification = packageDef.toSpecificationWithPrivate.eraseAttributes
 
