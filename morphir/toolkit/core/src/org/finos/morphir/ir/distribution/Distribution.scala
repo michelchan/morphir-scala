@@ -64,13 +64,28 @@ object Distribution {
         case Library(_, _, _) => None
       }
 
+    // Get the package specification of a distribution.
     def lookupPackageSpecification: UPackageSpecification = packageDef.toSpecificationWithPrivate.eraseAttributes
 
+    // Get the package name of a distribution.
     @inline def lookupPackageName: PackageName = packageName
 
+    // Add a package specification as a dependency of this library.
     def insertDependency(
         dependencyPackageName: PackageName,
         dependencyPackageSpec: UPackageSpecification
     ): Distribution = Library(packageName, dependencies + (dependencyPackageName -> dependencyPackageSpec), packageDef)
+
+    // Get all type specifications.
+    def typeSpecifications: Map[FQName, UTypeSpec] = ???
+
+    private def typeSpecsInDependencies: Map[FQName, UTypeSpec] = dependencies.map { case (pName, pSpec) =>
+      pSpec.modules.map { case (mName, mSpec) =>
+        mSpec.types.map { case (tName, documentedTypeSpec) =>
+          (FQName(pName, mName, tName), documentedTypeSpec.value)
+        }
+      }
+    }
+
   }
 }
