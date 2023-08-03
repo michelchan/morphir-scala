@@ -21,13 +21,16 @@ object Distribution {
       packageDef: PackageDefinition.Typed
   ) extends Distribution { self =>
 
+    // Look up a module specification by package and module path in a distribution.
     def lookupModuleSpecification(packageName: PackageName, module: QualifiedModuleName): Option[ModSpec.Raw] =
       self match {
         case Library(`packageName`, _, packageDef) =>
           packageDef.toSpecification.modules.get(module)
-        case Library(_, _, _) => None
+        case Library(_, dependencies, _) =>
+          dependencies.get(packageName).flatMap(_.lookupModuleSpecification(module.toPath))
       }
 
+    // Look up a type specification by package, module and local name in a distribution.
     def lookupTypeSpecification(pName: PackageName, module: QualifiedModuleName, localName: Name): Option[UTypeSpec] =
       lookupModuleSpecification(pName, module).flatMap(_.lookupTypeSpecification(localName))
 
