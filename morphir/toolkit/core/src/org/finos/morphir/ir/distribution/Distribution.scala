@@ -1,17 +1,17 @@
 package org.finos.morphir.ir.distribution
 
-import org.finos.morphir.ir.Module.{QualifiedModuleName, Specification => ModSpec}
+import org.finos.morphir.ir.Module.{QualifiedModuleName, Specification as ModSpec}
 import org.finos.morphir.ir.PackageModule.{
-  Definition => PackageDefinition,
   PackageName,
-  USpecification => UPackageSpecification
+  Definition as PackageDefinition,
+  USpecification as UPackageSpecification
 }
-import org.finos.morphir.ir.Type.{USpecification => UTypeSpec}
+import org.finos.morphir.ir.Type.USpecification as UTypeSpec
 import org.finos.morphir.ir.Type.Specification.TypeAliasSpecification
 import org.finos.morphir.ir.Type.Type.Reference
 import org.finos.morphir.ir.Type.UType
-import org.finos.morphir.ir.Value.{USpecification => UValueSpec, Definition => ValueDefinition}
-import org.finos.morphir.ir.{FQName, Name, QName}
+import org.finos.morphir.ir.Value.{Definition as ValueDefinition, USpecification as UValueSpec}
+import org.finos.morphir.ir.{FQName, Name, QName, Type}
 
 sealed trait Distribution
 object Distribution {
@@ -79,13 +79,17 @@ object Distribution {
     // Get all type specifications.
     def typeSpecifications: Map[FQName, UTypeSpec] = ???
 
-    private def typeSpecsInDependencies: Map[FQName, UTypeSpec] = dependencies.map { case (pName, pSpec) =>
-      pSpec.modules.map { case (mName, mSpec) =>
-        mSpec.types.map { case (tName, documentedTypeSpec) =>
-          (FQName(pName, mName, tName), documentedTypeSpec.value)
-        }
+    private def typeSpecsInDependencies: Map[FQName, UTypeSpec] =
+      dependencies.flatMap {
+        case (depPackageName, depPackageSpec) =>
+          depPackageSpec.modules.flatMap {
+            case (moduleName, moduleSpec) =>
+              moduleSpec.types.map {
+                case (localName, typeSpec) =>
+                  FQName(depPackageName, moduleName, localName) -> typeSpec.value
+              }
+          }
       }
-    }
 
   }
 }
