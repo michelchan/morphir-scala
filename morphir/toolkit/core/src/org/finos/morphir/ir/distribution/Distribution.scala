@@ -1,5 +1,6 @@
 package org.finos.morphir.ir.distribution
 
+import org.finos.morphir.Attributes
 import org.finos.morphir.ir.Module.{QualifiedModuleName, Specification as ModSpec}
 import org.finos.morphir.ir.PackageModule.{
   PackageName,
@@ -33,6 +34,9 @@ object Distribution {
     // Look up a type specification by package, module and local name in a distribution.
     def lookupTypeSpecification(pName: PackageName, module: QualifiedModuleName, localName: Name): Option[UTypeSpec] =
       lookupModuleSpecification(pName, module).flatMap(_.lookupTypeSpecification(localName))
+
+    def lookupTypeSpecification(fqName: FQName): Option[UTypeSpec] =
+      lookupTypeSpecification(fqName.packagePath, fqName.getModuleName, fqName.localName)
 
     // Look up the base type name following aliases by package, module and local name in a distribution.
     def lookupBaseTypeName(fqName: FQName): Option[FQName] =
@@ -77,7 +81,7 @@ object Distribution {
     ): Distribution = Library(packageName, dependencies + (dependencyPackageName -> dependencyPackageSpec), packageDef)
 
     // Get all type specifications.
-    def typeSpecifications: Map[FQName, UTypeSpec] = typeSpecsInDependencies + typeSpecsInPackage
+    def typeSpecifications: Map[FQName, UTypeSpec] = typeSpecsInDependencies ++ typeSpecsInPackage
 
     private def typeSpecsInDependencies: Map[FQName, UTypeSpec] =
       dependencies.flatMap {
@@ -99,6 +103,18 @@ object Distribution {
               FQName(packageName, mName, tName) -> accessControlledDocumentedTypeDef.value.value.toSpecification
           }
       }
-  }
+
+//    def lookupTypeConstructor(fqName: FQName): Option[(FQName, List[Name], List[(Name, UType)])] =
+//      self.lookupModuleSpecification(fqName.packagePath, fqName.getModuleName).map(moduleSpec =>
+//        moduleSpec.types.collect { case (typeName, documentedTypeSpec) =>
+//          documentedTypeSpec.value match {
+//            case Type.Specification.CustomTypeSpecification(typeParams, ctors) => ctors.map(args =>
+//                (FQName(fqName.packagePath, fqName.modulePath, typeName), typeParams, args)
+//              )
+//            case _ => None
+//          }
+//        }
+//      )
+
 
 }
