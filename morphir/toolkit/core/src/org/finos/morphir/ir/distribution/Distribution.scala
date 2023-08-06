@@ -116,5 +116,12 @@ object Distribution {
 //        }
 //      )
 
+//    def resolveAliases(fqName: FQName): FQName = lookupTypeSpecification(fqName).map(typeSpec =>
+//      typeSpec match {
+//        case Type.Specification.TypeAliasSpecification(_, expr: Reference[Attributes]) => expr.typ
+//        case _                                                           => fqName
+//      }
+//    ).getOrElse(fqName)
+  }
 
 }
