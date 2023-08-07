@@ -105,6 +105,14 @@ object Distribution {
           }
       }
 
+    /**
+     * Look up a type constructor by fully-qualified name. Dependencies will be included in the search. The function
+     * returns a tuple with the following elements:
+     *
+     *   - The fully-qualified name of the type that this constructor belongs to.
+     *   - The type arguments of the type.
+     *   - The list of arguments (as name-type pairs) for this constructor.
+     */
     def lookupTypeConstructor(fqName: FQName): Option[(FQName, Chunk[Name], Chunk[(Name, UType)])] =
       self.lookupModuleSpecification(fqName.packagePath, fqName.getModuleName).flatMap(moduleSpec =>
         moduleSpec.types.collect { case (typeName, documentedTypeSpec) =>
@@ -118,12 +126,13 @@ object Distribution {
         }.head
       )
 
-//    def resolveAliases(fqName: FQName): FQName = lookupTypeSpecification(fqName).map(typeSpec =>
-//      typeSpec match {
-//        case Type.Specification.TypeAliasSpecification(_, expr: Reference[Attributes]) => expr.typeName
-//        case _                                                                         => fqName
-//      }
-//    ).getOrElse(fqName)
+    // Follow direct aliases until the leaf type is found.
+    def resolveAliases(fqName: FQName): FQName = lookupTypeSpecification(fqName).map(typeSpec =>
+      typeSpec match {
+        case Type.Specification.TypeAliasSpecification(_, expr: Reference[Attributes]) => expr.typeName
+        case _                                                                         => fqName
+      }
+    ).getOrElse(fqName)
   }
 
 }
