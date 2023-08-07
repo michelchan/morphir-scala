@@ -13,6 +13,7 @@ import org.finos.morphir.ir.Type.Type.Reference
 import org.finos.morphir.ir.Type.UType
 import org.finos.morphir.ir.Value.{Definition as ValueDefinition, USpecification as UValueSpec}
 import org.finos.morphir.ir.{Documented, FQName, Name, QName, Type}
+import zio.Chunk
 
 sealed trait Distribution
 object Distribution {
@@ -104,22 +105,23 @@ object Distribution {
           }
       }
 
-//    def lookupTypeConstructor(fqName: FQName): Option[(FQName, List[Name], List[(Name, UType)])] =
-//      self.lookupModuleSpecification(fqName.packagePath, fqName.getModuleName).map(moduleSpec =>
-//        moduleSpec.types.collect { case (typeName, documentedTypeSpec) =>
-//          documentedTypeSpec.value match {
-//            case Type.Specification.CustomTypeSpecification(typeParams, ctors) => ctors.map(args =>
-//                (FQName(fqName.packagePath, fqName.modulePath, typeName), typeParams, args)
-//              )
-//            case _ => None
-//          }
-//        }
-//      )
+    def lookupTypeConstructor(fqName: FQName): Option[(FQName, Chunk[Name], Chunk[(Name, UType)])] =
+      self.lookupModuleSpecification(fqName.packagePath, fqName.getModuleName).flatMap(moduleSpec =>
+        moduleSpec.types.collect { case (typeName, documentedTypeSpec) =>
+          documentedTypeSpec.value match {
+            case Type.Specification.CustomTypeSpecification(typeParams, ctors) =>
+              ctors.toMap.get(fqName.localName).map(constructorArgs =>
+                (FQName(fqName.packagePath, fqName.modulePath, typeName), typeParams, constructorArgs)
+              )
+            case _ => None
+          }
+        }.head
+      )
 
 //    def resolveAliases(fqName: FQName): FQName = lookupTypeSpecification(fqName).map(typeSpec =>
 //      typeSpec match {
-//        case Type.Specification.TypeAliasSpecification(_, expr: Reference[Attributes]) => expr.typ
-//        case _                                                           => fqName
+//        case Type.Specification.TypeAliasSpecification(_, expr: Reference[Attributes]) => expr.typeName
+//        case _                                                                         => fqName
 //      }
 //    ).getOrElse(fqName)
   }
