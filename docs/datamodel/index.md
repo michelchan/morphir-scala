@@ -9,3 +9,11 @@ intention is to provide a front-end or back-end for a data format.
 
 The Morphir data model implements a front-end and back-end to the Morphir IR and allows those integrating data formats
 to only have to integrate with MDM, which closer resembles other data format integration activities.
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```

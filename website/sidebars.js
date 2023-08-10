@@ -15,19 +15,19 @@
 const sidebars = {
   tutorialSidebar: [
     'intro',
-    {
-      type: 'category',
-      label: 'Data Model',
-      items: [
-        'datamodel/datamodel',
-        'datamodel/schema',
-        'datamodel/primitives',
-        'datamodel/lists',
-        'datamodel/maps',
-        'datamodel/records',
-        'datamodel/enums',
-      ],
-    },
+    // {
+    //   type: 'category',
+    //   label: 'Data Model',
+    //   items: [
+        // 'datamodel/datamodel',
+        // 'datamodel/schema',
+        // 'datamodel/primitives',
+        // 'datamodel/lists',
+        // 'datamodel/maps',
+        // 'datamodel/records',
+        // 'datamodel/enums',
+    //   ],
+    // },
     {
       type: 'category',
       label: 'Morphir IR',

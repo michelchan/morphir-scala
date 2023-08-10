@@ -76,9 +76,8 @@ trait Docusaurus2Module extends Module {
 
     val process = Jvm.spawnSubprocess(
       commandArgs = Seq(
-        "yarn",
+        "npm",
         "install",
-        "--check-cache"
       ),
       envArgs = Map.empty,
       workingDir = T.dest
@@ -152,7 +151,8 @@ trait Docusaurus2Module extends Module {
 
     val p2 = Jvm.spawnSubprocess(
       commandArgs = Seq(
-        "yarn",
+        "npm",
+        "run",
         "build"
       ),
       envArgs = Map.empty,
@@ -168,7 +168,7 @@ trait Docusaurus2Module extends Module {
     val workDir = docusaurusBuild().path
     Jvm.runSubprocess(
       commandArgs = Seq(
-        "yarn",
+        "npm",
         "start"
       ),
       envArgs = T.env,
