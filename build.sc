@@ -3,7 +3,7 @@ import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.7.1`
 import $ivy.`io.chris-kipp::mill-ci-release::0.1.9`
 import $ivy.`com.lihaoyi::mill-contrib-buildinfo:$MILL_VERSION`
 import $file.project.deps, deps.{Deps, MillVersions, Versions => Vers}
-import $file.project.modules.docs, docs.{Docusaurus2Module, MDocModule}
+import $file.project.modules.docs, docs.Docusaurus2Module
 import de.tobiasroeser.mill.integrationtest._
 import io.kipp.mill.ci.release.CiReleaseModule
 import millbuild._
@@ -66,7 +66,7 @@ object morphir extends Cross[MorphirModule](buildSettings.scala.crossScalaVersio
     object integration extends Module {
       object `mill-morphir-elm` extends Cross[MillMorphirElmPlugin](MillVersions.all)
       trait MillMorphirElmPlugin
-          extends Cross.Module[String]
+        extends Cross.Module[String]
           with ScalaModule
           with ScalafmtModule
           with MorphirPublishModule {
@@ -131,11 +131,11 @@ trait MorphirModule extends Cross.Module[String] with CrossPlatform { morphir =>
       Deps.dev.zio.`zio-prelude`
     )
     def compileIvyDeps = super.compileIvyDeps() ++ (if (crossScalaVersion.startsWith("2."))
-                                                      Agg(
-                                                        Deps.org.`scala-lang`.`scala-reflect`(crossScalaVersion),
-                                                        Deps.org.`scala-lang`.`scala-compiler`(crossScalaVersion)
-                                                      )
-                                                    else Agg.empty)
+      Agg(
+        Deps.org.`scala-lang`.`scala-reflect`(crossScalaVersion),
+        Deps.org.`scala-lang`.`scala-compiler`(crossScalaVersion)
+      )
+    else Agg.empty)
 
     def scalacOptions = T {
       // val additionalOptions = if (crossScalaVersion.startsWith("2.13")) Seq("-Ymacro-annotations") else Seq.empty
@@ -228,11 +228,11 @@ trait MorphirModule extends Cross.Module[String] with CrossPlatform { morphir =>
     trait Shared extends MorphirCommonModule with MorphirPublishModule {
       def ivyDeps = Agg(Deps.com.lihaoyi.pprint, Deps.dev.zio.`zio-prelude`)
       def compileIvyDeps = super.compileIvyDeps() ++ (if (crossScalaVersion.startsWith("2."))
-                                                        Agg(
-                                                          Deps.org.`scala-lang`.`scala-reflect`(crossScalaVersion),
-                                                          Deps.org.`scala-lang`.`scala-compiler`(crossScalaVersion)
-                                                        )
-                                                      else Agg.empty)
+        Agg(
+          Deps.org.`scala-lang`.`scala-reflect`(crossScalaVersion),
+          Deps.org.`scala-lang`.`scala-compiler`(crossScalaVersion)
+        )
+      else Agg.empty)
 
       def scalacOptions = T {
         // val additionalOptions = if (crossScalaVersion.startsWith("2.13")) Seq("-Ymacro-annotations") else Seq.empty
@@ -673,17 +673,11 @@ object shared extends Module {
     }
   }
 }
-object site extends Docusaurus2Module with MDocModule {
+
+object site extends Docusaurus2Module {
   val workspaceDir = millbuild.build.millSourcePath
 
-  override def scalaMdocVersion: T[String] = T("2.3.7")
-  override def scalaVersion                = T(docsScalaVersion)
-  // MD Sources that must be compiled with Scala MDoc
-  override def mdocSources = T.sources(workspaceDir / "docs")
   // MD Sources that are just plain MD files
   override def docusaurusSources = T.sources(workspaceDir / "website")
-
-  override def watchedMDocsDestination: T[Option[os.Path]] = T(Some(docusaurusBuild().path / "docs"))
-  override def compiledMdocs: Sources                      = T.sources(mdoc().path)
-  object test extends ScalaTests with TestModule.Munit {}
+  override def compiledMdocs: Sources = T.sources(workspaceDir / "website" / "docs")
 }

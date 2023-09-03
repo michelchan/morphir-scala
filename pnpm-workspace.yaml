@@ -1,3 +1,4 @@
 packages:
   - "website"
   - "examples/morphir-elm-projects/evaluator-tests"
+  - "out/site/**"

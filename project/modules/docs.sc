@@ -4,58 +4,12 @@ import mill.util.Jvm
 import mill.define.Target
 import os.Path
 
-trait MDocModule extends ScalaModule {
-
-  def scalaMdocVersion: T[String] = T("2.3.7")
-
-  def scalaMdocDep: T[Dep] = T(ivy"org.scalameta::mdoc:${scalaMdocVersion()}")
-
-  def watchedMDocsDestination: T[Option[Path]] = T(None)
-
-  override def ivyDeps = T {
-    super.ivyDeps() ++ Agg(scalaMdocDep())
-  }
-
-  // where do the mdoc sources live ?
-  def mdocSources = T.sources(super.millSourcePath)
-
-  def mdoc: T[PathRef] = T {
-
-    val cp = runClasspath().map(_.path)
-
-    val dir = T.dest.toIO.getAbsolutePath
-    val dirParams =
-      mdocSources().map(pr => Seq(s"--in", pr.path.toIO.getAbsolutePath, "--out", dir)).iterator.flatten.toSeq
-
-    Jvm.runLocal("mdoc.Main", cp, dirParams)
-
-    PathRef(T.dest)
-  }
-
-  def mdocWatch() = T.command {
-
-    watchedMDocsDestination() match {
-      case None =>
-        throw new Exception("watchedMDocsDestination is not set, so we dant know where to put compiled md files")
-      case Some(p) =>
-        val cp = runClasspath().map(_.path)
-        val dirParams = mdocSources()
-          .map(pr => Seq(s"--in", pr.path.toIO.getAbsolutePath, "--out", p.toIO.getAbsolutePath))
-          .iterator
-          .flatten
-          .toSeq
-        Jvm.runLocal("mdoc.Main", cp, dirParams ++ Seq("--watch"))
-    }
-
-  }
-}
-
 trait Docusaurus2Module extends Module {
 
   def docusaurusSources: Sources
   def compiledMdocs: Sources
 
-  def yarnInstall: T[PathRef] = T {
+  def pnpmInstall: T[PathRef] = T {
     val baseDir = T.dest
 
     docusaurusSources().foreach { pr =>
@@ -75,9 +29,8 @@ trait Docusaurus2Module extends Module {
 
     val process = Jvm.spawnSubprocess(
       commandArgs = Seq(
-        "yarn",
+        "pnpm",
         "install",
-        "--check-cache"
       ),
       envArgs = Map.empty,
       workingDir = T.dest
@@ -87,15 +40,25 @@ trait Docusaurus2Module extends Module {
     PathRef(T.dest)
   }
 
-  def installedDocusaurusSources = T.source(yarnInstall().path)
+  def installedDocusaurusSources = T.source(pnpmInstall().path)
 
   def docusaurusBuild: T[PathRef] = T {
     val workDir                = T.dest
     val docusaurusInstallation = installedDocusaurusSources()
-    val yarnSetup              = docusaurusInstallation.path
+    val pnpmSetup              = docusaurusInstallation.path
+
+    val proc = Jvm.spawnSubprocess(
+      commandArgs = Seq(
+        "sbt",
+        "compileDocs"
+      ),
+      envArgs = Map.empty,
+      workingDir = millbuild.build.millSourcePath
+    )
+    proc.join()
 
     os.copy(
-      yarnSetup,
+      pnpmSetup,
       workDir,
       followLinks = true,
       replaceExisting = true,
@@ -104,54 +67,51 @@ trait Docusaurus2Module extends Module {
       mergeFolders = false
     )
 
-    val docsDir = workDir / "docs"
-    os.makeDir.all(docsDir)
-    os.list(docsDir).foreach(os.remove.all)
+//
+//    val docsDir = workDir / "docs"
+//    os.makeDir.all(docsDir)
+//    os.list(docsDir).foreach(os.remove.all)
+//
+//    Seq(docusaurusInstallation).foreach { pr =>
+//      val bd = pr.path
+//      os.walk(pr.path / "docs").foreach { p =>
+//        val relPath = p.relativeTo(bd / "docs")
+//        T.log.info(relPath.toString())
+//        if (p.toIO.isFile) {
+//          val target = docsDir / relPath
+//          os.makeDir.all(target)
+//          os.copy.over(p, docsDir / relPath)
+//        }
+//      }
+//    }
+//
+//    compiledMdocs().foreach { pr =>
+//      os.list(pr.path)
+//        .foreach(p =>
+//          os.copy.into(
+//            p,
+//            docsDir,
+//            followLinks = true,
+//            replaceExisting = true,
+//            copyAttributes = true,
+//            createFolders = true,
+//            mergeFolders = true
+//          )
+//        )
+//    }
 
-    Seq(docusaurusInstallation).foreach { pr =>
-      val bd = pr.path
-      os.walk(pr.path / "docs").foreach { p =>
-        val relPath = p.relativeTo(bd / "docs")
-        T.log.info(relPath.toString())
-        if (p.toIO.isFile) {
-          val target = docsDir / relPath
-          os.makeDir.all(target)
-          os.copy.over(p, docsDir / relPath)
-        }
-      }
-    }
-
-    compiledMdocs().foreach { pr =>
-      os.list(pr.path)
-        .foreach(p =>
-          os.copy.into(
-            p,
-            docsDir,
-            followLinks = true,
-            replaceExisting = true,
-            copyAttributes = true,
-            createFolders = true,
-            mergeFolders = true
-          )
-        )
-    }
-
-    // For some reason we cant run yarn build otherwise
-    // val p1 = Jvm.spawnSubprocess(
-    //   commandArgs = Seq(
-    //     "yarn",
-    //     "install",
-    //     "--force"
-    //   ),
-    //   envArgs = Map.empty,
-    //   workingDir = workDir
-    // )
-
-    // p1.join()
+    val process = Jvm.spawnSubprocess(
+      commandArgs = Seq(
+        "pnpm",
+        "install"
+      ),
+      envArgs = Map.empty,
+      workingDir = T.dest
+    )
 
     val p2 = Jvm.spawnSubprocess(
       commandArgs = Seq(
-        "yarn",
+        "pnpm",
         "build"
       ),
       envArgs = Map.empty,
@@ -167,7 +127,7 @@ trait Docusaurus2Module extends Module {
     val workDir = docusaurusBuild().path
     Jvm.runSubprocess(
       commandArgs = Seq(
-        "yarn",
+        "pnpm",
         "start"
       ),
       envArgs = T.env,

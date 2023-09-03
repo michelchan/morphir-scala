@@ -55,26 +55,11 @@ function readPackage(packageJson, context) {
             }
         }
 
-        // This is a workaround for what a possible PNPM bug?  Because "@docusaurus/types" is an optional
-        // peer dependency, we end up with side-by-side installs of "@docusaurus/theme-common" etc whose
-        // only difference is whether "@docusaurus/types" was included.
-        if (packageJson.name.startsWith('@docusaurus/')) {
-            packageJson.dependencies['@docusaurus/types'] = '^2.4.1';
-        }
-
         if (packageJson.dependencies['trim'] == '0.0.1') {
             // remark-parse@8.0.3 still depends on "trim" with the CVE-2020-7753 vulnerability
             // https://github.com/facebook/docusaurus/issues/7275
             packageJson.dependencies['trim'] = '^1.0.0';
         }
-        //
-        // if (packageJson.dependencies['tslib']) {
-        //     packageJson.dependencies['tslib'] = '^2.6.1';
-        // }
-        //
-        // if (packageJson.dependencies['react-dom']) {
-        //     packageJson.dependencies['tslib'] = '^2.6.1';
-        // }
     }
 
     return packageJson;
