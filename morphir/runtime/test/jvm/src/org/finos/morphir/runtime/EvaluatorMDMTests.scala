@@ -399,7 +399,9 @@ object EvaluatorMDMTests extends MorphirBaseSpec {
         ),
         testEvaluation("add")("decimalTests", "decimalAdd")(Data.Decimal(673.45)),
         testEvaluation("bps")("decimalTests", "decimalBps")(Data.Decimal(0.0463)),
-//        testEvaluation("compare")("decimalTests", "decimalAdd")(Data.Decimal(673.45)),
+        testEvalMultiple("compare 1")("decimalTests", "decimalCompare", List(673.45, 122.2))(Data.Order(1)),
+        testEvalMultiple("compare 0")("decimalTests", "decimalCompare", List(0, 0))(Data.Order(0)),
+        testEvalMultiple("compare -1")("decimalTests", "decimalCompare", List(0.45, 0.99))(Data.Order(-1)),
         suite("div")(
           testEvaluation("div some")("decimalTests", "decimalGoodDiv")(Data.Optional.Some(Data.Decimal(1.8))),
           testEvaluation("div none")("decimalTests", "decimalBadDiv")(Data.Optional.None(Concept.Decimal)),
