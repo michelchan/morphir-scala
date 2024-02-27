@@ -69,6 +69,30 @@ object DecimalSDK {
       MaybeSDK.resultToMaybe(result)
   }
 
+  val hundred = DynamicNativeFunction1("hundred") {
+    (_: NativeContext) => (int: RT.Primitive.Int) =>
+      val result = int.valueAsInt * 100
+      RTDecimal(result)
+  }
+
+  val thousand = DynamicNativeFunction1("thousand") {
+    (_: NativeContext) => (int: RT.Primitive.Int) =>
+      val result = int.valueAsInt * 1000
+      RTDecimal(result)
+  }
+
+  val million = DynamicNativeFunction1("million") {
+    (_: NativeContext) => (int: RT.Primitive.Int) =>
+      val result = int.valueAsInt * 1000000
+      RTDecimal(result)
+  }
+
+  val tenth = DynamicNativeFunction1("tenth") {
+    (_: NativeContext) => (int: RT.Primitive.Int) =>
+      val result = int.valueAsInt * .1
+      RTDecimal(result)
+  }
+
   val gt = DynamicNativeFunction2("gt") {
     (_: NativeContext) => (dec1: RTDecimal, dec2: RTDecimal) =>
       val result = dec1.value > dec2.value
