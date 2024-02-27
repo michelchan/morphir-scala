@@ -62,6 +62,62 @@ decimalAdd ctx =
         (fromFloat 773.45)
 
 
+{-| Test: Decimal/hundred
+expected(-6) = -600.0
+-}
+decimalHundred : Int -> Decimal
+decimalHundred int =
+    hundred int
+
+
+{-| Test: Decimal/thousand
+expected(20) = 20000.0
+-}
+decimalThousand : Int -> Decimal
+decimalThousand int =
+    thousand int
+
+
+{-| Test: Decimal/million
+expected(-3) = -3000000.0
+-}
+decimalMillion : Int -> Decimal
+decimalMillion int =
+    million int
+
+
+{-| Test: Decimal/tenth
+expected(-99) = -.99
+-}
+decimalTenth : Int -> Decimal
+decimalTenth int =
+    tenth int
+
+
+{-| Test: Decimal/hundredth
+expected(-633) = -0633
+-}
+decimalHundredth : Int -> Decimal
+decimalHundredth int =
+    hundredth int
+
+
+{-| Test: Decimal/thousandth
+expected(20) = .002
+-}
+decimalThousandth : Int -> Decimal
+decimalThousandth int =
+    thousandth int
+
+
+{-| Test: Decimal/millionth
+expected(-3) = -0.0000003
+-}
+decimalMillionth : Int -> Decimal
+decimalMillionth int =
+    millionth int
+
+
 {-| Test: Decimal/bps
 expected = 0.0463
 -}
@@ -72,12 +128,14 @@ decimalBps ctx =
         463
 
 
-
---{-| Test: Decimal/compare
----}
---decimalCompare : Decimal -> Decimal -> Decimal
---decimalCompare a b =
---    Decimal.compare a b
+{-| Test: Decimal/compare
+expected(673.45, 122.2) = 1
+expected(0, 0) = 0
+expected(0.45, 0.99) = -1
+-}
+decimalCompare : Decimal -> Decimal -> Decimal
+decimalCompare a b =
+    Decimal.compare a b
 
 
 {-| Test: Decimal/div
