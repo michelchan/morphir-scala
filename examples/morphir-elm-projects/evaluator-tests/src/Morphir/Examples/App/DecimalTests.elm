@@ -87,7 +87,7 @@ decimalMillion int =
 
 
 {-| Test: Decimal/tenth
-expected(-99) = -.99
+expected(-99) = -9.9
 -}
 decimalTenth : Int -> Decimal
 decimalTenth int =
@@ -95,7 +95,7 @@ decimalTenth int =
 
 
 {-| Test: Decimal/hundredth
-expected(-633) = -0633
+expected(-633) = -6.33
 -}
 decimalHundredth : Int -> Decimal
 decimalHundredth int =
@@ -103,7 +103,7 @@ decimalHundredth int =
 
 
 {-| Test: Decimal/thousandth
-expected(20) = .002
+expected(20) = 0.02
 -}
 decimalThousandth : Int -> Decimal
 decimalThousandth int =
@@ -111,7 +111,7 @@ decimalThousandth int =
 
 
 {-| Test: Decimal/millionth
-expected(-3) = -0.0000003
+expected(-3) = -0.000003
 -}
 decimalMillionth : Int -> Decimal
 decimalMillionth int =
@@ -126,16 +126,6 @@ decimalBps ctx =
     test ctx
         bps
         463
-
-
-{-| Test: Decimal/compare
-expected(673.45, 122.2) = 1
-expected(0, 0) = 0
-expected(0.45, 0.99) = -1
--}
-decimalCompare : Decimal -> Decimal -> Decimal
-decimalCompare a b =
-    Decimal.compare a b
 
 
 {-| Test: Decimal/div
