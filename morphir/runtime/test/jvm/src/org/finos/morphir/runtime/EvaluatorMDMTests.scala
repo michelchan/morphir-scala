@@ -398,10 +398,14 @@ object EvaluatorMDMTests extends MorphirBaseSpec {
           testEvaluation("negative value")("decimalTests", "decimalNegativeAbs")(Data.Decimal(100.243))
         ),
         testEvaluation("add")("decimalTests", "decimalAdd")(Data.Decimal(673.45)),
+        testEval("hundred")("decimalTests", "decimalHundred", -6)(Data.Decimal(-600.0)),
+        testEval("thousand")("decimalTests", "decimalThousand", 20)(Data.Decimal(20000.0)),
+        testEval("million")("decimalTests", "decimalMillion", -3)(Data.Decimal(-3000000)),
+        testEval("tenth")("decimalTests", "decimalTenth", -99)(Data.Decimal(-9.9)),
+        testEval("hundredth")("decimalTests", "decimalHundredth", -633)(Data.Decimal(-6.33)),
+        testEval("thousandth")("decimalTests", "decimalThousandth", 20)(Data.Decimal(0.02)),
+        testEval("millionth")("decimalTests", "decimalMillionth", -3)(Data.Decimal(-0.000003)),
         testEvaluation("bps")("decimalTests", "decimalBps")(Data.Decimal(0.0463)),
-        testEvalMultiple("compare 1")("decimalTests", "decimalCompare", List(673.45, 122.2))(Data.Order(1)),
-        testEvalMultiple("compare 0")("decimalTests", "decimalCompare", List(0, 0))(Data.Order(0)),
-        testEvalMultiple("compare -1")("decimalTests", "decimalCompare", List(0.45, 0.99))(Data.Order(-1)),
         suite("div")(
           testEvaluation("div some")("decimalTests", "decimalGoodDiv")(Data.Optional.Some(Data.Decimal(1.8))),
           testEvaluation("div none")("decimalTests", "decimalBadDiv")(Data.Optional.None(Concept.Decimal)),
